@@ -27,6 +27,7 @@ Built for **Technical Directors**, **AI-savvy artists**, and **Pipeline Engineer
 
 ## 🚀 30-Second Start
 
+
 ### For the AI Agent (MCP Server)
 ```bash
 # 1. Install
@@ -36,7 +37,9 @@ pip install frame-pulse-mcp
 python -m frame_pulse.server
 
 # 3. Add to your Claude Desktop config
-# ~/Library/Application\ Support/Claude/claude_desktop_config.json
+# Mac: ~/Library/Application Support/Claude/claude_desktop_config.json
+# Win: %APPDATA%/Claude/claude_desktop_config.json
+
 {
   "mcpServers": {
     "frame-pulse": {
@@ -45,6 +48,9 @@ python -m frame_pulse.server
     }
   }
 }
+```
+
+
 
 ## ☕ Support the Mission
 
