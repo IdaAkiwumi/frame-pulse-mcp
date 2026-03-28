@@ -43,13 +43,7 @@ with st.sidebar:
     
     Bridge Claude, Hermes, and Cursor with your 3D pipeline—monitor Blender, Unreal Engine, Houdini, and Maya in real-time.
     """)
-    
-    st.divider()
-    
-    st.markdown("### 🔗 Connect")
-    st.markdown("[📂 GitHub Repository](https://github.com/idaakiwumi/frame-pulse-mcp)")
-    st.markdown("[💼 LinkedIn](https://www.linkedin.com/in/idaa11/)")
-    st.markdown("[👩🏽‍💻 Developer Profile](https://github.com/idaakiwumi)")
+
     
     st.divider()
     
@@ -73,6 +67,13 @@ with st.sidebar:
     thermal throttling, AI safety layer, technical director tools,
     Python system monitoring, LLM tool integration
     """)
+    
+    st.divider()
+    
+    st.markdown("### 🔗 Connect")
+    st.markdown("[📂 GitHub Repository](https://github.com/idaakiwumi/frame-pulse-mcp)")
+    st.markdown("[💼 LinkedIn](https://www.linkedin.com/in/idaa11/)")
+    st.markdown("[👩🏽‍💻 Developer Profile](https://github.com/idaakiwumi)")
 
 # Main header with connection indicator
 header_cols = st.columns([6, 1])
