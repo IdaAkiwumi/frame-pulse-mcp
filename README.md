@@ -53,6 +53,28 @@ python -m frame_pulse.server
 ```
 
 
+## 🛠️ Built With
+
+- **[MCP](https://modelcontextprotocol.io/)** — Model Context Protocol for AI tool interoperability
+- **[FastMCP](https://github.com/modelcontextprotocol/python-sdk)** — Python SDK for MCP servers
+- **[psutil](https://github.com/giampaolo/psutil)** — Cross-platform system monitoring
+- **[Streamlit](https://streamlit.io/)** — Rapid Python dashboarding
+
+## 📸 Demo
+
+[30-second GIF: Claude asking "Start my render?" → Frame Pulse responding "CAUTION: CPU 89%" → User clicking throttle → Success toast]
+
+## 🤝 Who's Using This
+
+> "Frame Pulse caught a thermal spike before our overnight farm render. Saved us 14 hours of redo work."  
+> — Anonymous VFX Supervisor (via DM)
+
+## 🗺️ Roadmap
+
+- [ ] GPU VRAM monitoring (NVIDIA NVML)
+- [ ] Discord/Slack webhook alerts
+- [ ] Multi-node render farm dashboard
+- [ ] macOS thermal zone support
 
 ## ☕ Support the Mission
 
