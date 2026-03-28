@@ -5,7 +5,7 @@ import os
 # Add src to path so we can import our tools
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from Frame_pulse.server import get_thermal_status, find_render_processes, emergency_throttle
+from frame_pulse.server import get_thermal_status, find_render_processes, emergency_throttle
 
 st.set_page_config(page_title="Frame Pulse | Studio Telemetry", layout="wide", page_icon="🎬")
 
