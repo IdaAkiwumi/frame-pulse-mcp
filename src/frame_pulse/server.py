@@ -1,10 +1,20 @@
-import psutil
+"""
+Frame Pulse MCP Server
+MCP tools for AI agents to monitor and govern creative workstations.
+"""
+
+import sys
+import os
+
+# Add parent to path for absolute imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from mcp.server.fastmcp import FastMCP
 from typing import Optional
 
-# Import from our new modules
-from .system_client import get_thermal_status, get_system_stats
-from .render_guard import find_render_processes, format_process_list, emergency_throttle
+# Absolute imports (work when run directly)
+from frame_pulse.system_client import get_thermal_status
+from frame_pulse.render_guard import find_render_processes, format_process_list, emergency_throttle
 
 mcp = FastMCP("FramePulse")
 
@@ -24,7 +34,7 @@ def throttle_process(target_pid: Optional[int] = None):
     """Reduce CPU priority of a process to prevent overheating."""
     return emergency_throttle(target_pid)
 
-# Backward compatible aliases for old tool names
+# Backward compatible aliases
 @mcp.tool()
 def get_thermal_status_alias():
     """Alias for check_system_health."""

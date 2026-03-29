@@ -1,20 +1,22 @@
 """
-Alert integrations for Frame Pulse MCP.
-Not called directly by MCP tools — used by Streamlit or scheduled jobs.
+Discord and Telegram alert integrations for Frame Pulse MCP.
 """
 
 import os
-import json
 import asyncio
-from typing import Optional
+import time
+import re
 from dataclasses import dataclass
+from typing import Optional
+
 
 @dataclass
 class AlertConfig:
     discord_webhook: Optional[str] = None
     telegram_bot_token: Optional[str] = None
     telegram_chat_id: Optional[str] = None
-    thermal_threshold: float = 85.0  # CPU % to trigger alert
+    thermal_threshold: float = 85.0
+
 
 class AlertManager:
     def __init__(self, config: Optional[AlertConfig] = None):
@@ -31,23 +33,32 @@ class AlertManager:
             thermal_threshold=float(os.getenv("THERMAL_THRESHOLD", "85.0"))
         )
     
-    async def send_discord(self, message: str, status: str = "info"):
+    async def send_discord(self, message: str, status: str = "info") -> str:
         """Send alert to Discord webhook."""
         if not self.config.discord_webhook:
             return "Discord not configured"
         
         color_map = {
-            "info": 0x3498db,      # Blue
-            "warning": 0xf39c12,   # Orange
-            "critical": 0xe74c3c   # Red
+            "info": 0x3498db,
+            "warning": 0xf39c12,
+            "critical": 0xe74c3c,
+            "success": 0x2ecc71
+        }
+        
+        emoji_map = {
+            "info": "ℹ️",
+            "warning": "⚠️",
+            "critical": "🔥",
+            "success": "✅"
         }
         
         payload = {
+            "username": "Frame Pulse",
             "embeds": [{
-                "title": "🎬 Frame Pulse Alert",
+                "title": f"{emoji_map.get(status, 'ℹ️')} Frame Pulse Alert",
                 "description": message,
                 "color": color_map.get(status, 0x3498db),
-                "footer": {"text": "Frame Pulse MCP • Creative Workstation Monitor"}
+                "footer": {"text": "frame-pulse-mcp · AI-native workstation telemetry"}
             }]
         }
         
@@ -60,21 +71,27 @@ class AlertManager:
                     headers={"Content-Type": "application/json"}
                 ) as resp:
                     if resp.status == 204:
-                        return "Discord alert sent"
-                    return f"Discord error: {resp.status}"
+                        return "✅ Discord alert sent"
+                    return f"❌ Discord error {resp.status}"
         except Exception as e:
-            return f"Discord failed: {e}"
+            return f"❌ Discord failed: {e}"
     
-    async def send_telegram(self, message: str):
+    async def send_telegram(self, message: str) -> str:
         """Send alert via Telegram Bot API."""
         if not self.config.telegram_bot_token or not self.config.telegram_chat_id:
             return "Telegram not configured"
         
         url = f"https://api.telegram.org/bot{self.config.telegram_bot_token}/sendMessage"
+        
+        # Escape for MarkdownV2
+        escape_chars = r'_*[]()~`>#+-=|{}.!'
+        escaped_msg = re.sub(f'([{re.escape(escape_chars)}])', r'\\\\\\1', message)
+        
         payload = {
             "chat_id": self.config.telegram_chat_id,
-            "text": f"🎬 *Frame Pulse Alert*\n\n{message}",
-            "parse_mode": "Markdown"
+            "text": f"🎬 *Frame Pulse*\\n\\n{escaped_msg}",
+            "parse_mode": "MarkdownV2",
+            "disable_web_page_preview": True
         }
         
         try:
@@ -83,46 +100,51 @@ class AlertManager:
                 async with session.post(url, json=payload) as resp:
                     result = await resp.json()
                     if result.get("ok"):
-                        return "Telegram alert sent"
-                    return f"Telegram error: {result}"
+                        return "✅ Telegram alert sent"
+                    return f"❌ Telegram error: {result}"
         except Exception as e:
-            return f"Telegram failed: {e}"
+            return f"❌ Telegram failed: {e}"
     
-    async def check_and_alert(self, thermal_status: str):
-        """Smart alerting with cooldown to prevent spam."""
-        import time
+    async def check_and_alert(self, thermal_status: str) -> Optional[str]:
+        """Smart alerting with cooldown to both Discord and Telegram."""
         
-        # Check if we should alert
         is_critical = "CRITICAL" in thermal_status
         is_caution = "CAUTION" in thermal_status
         
         if not (is_critical or is_caution):
-            return None  # Safe state, no alert needed
+            return None  # Safe state, no alert
         
-        # Cooldown check
         current_time = time.time()
         if current_time - self._last_alert_time < self._cooldown_seconds:
-            return "Alert on cooldown"
+            return "⏳ Alert on cooldown (5 min)"
         
         self._last_alert_time = current_time
-        
-        # Determine severity
         status = "critical" if is_critical else "warning"
         
-        # Send to all configured channels
         results = []
         
         if self.config.discord_webhook:
-            result = await self.send_discord(thermal_status, status)
-            results.append(result)
+            results.append(await self.send_discord(thermal_status, status))
         
         if self.config.telegram_bot_token:
-            result = await self.send_telegram(thermal_status)
-            results.append(result)
+            results.append(await self.send_telegram(thermal_status))
         
-        return " | ".join(results) if results else "No alerts configured"
+        return " | ".join(results) if results else "ℹ️ No alerts configured"
 
-# Singleton for reuse
+
+def send_discord_sync(message: str, status: str = "info") -> str:
+    """Synchronous wrapper for non-async contexts."""
+    manager = AlertManager()
+    try:
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            asyncio.create_task(manager.send_discord(message, status))
+            return "⏳ Alert queued"
+        return asyncio.run(manager.send_discord(message, status))
+    except Exception as e:
+        return f"❌ Failed: {e}"
+
+
 _default_manager: Optional[AlertManager] = None
 
 def get_alert_manager() -> AlertManager:
@@ -130,18 +152,3 @@ def get_alert_manager() -> AlertManager:
     if _default_manager is None:
         _default_manager = AlertManager()
     return _default_manager
-
-# Convenience function for synchronous contexts
-def send_alert_sync(message: str, status: str = "info"):
-    """Fire-and-forget alert for non-async code."""
-    manager = get_alert_manager()
-    try:
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            # Already in async context, schedule task
-            asyncio.create_task(manager.send_discord(message, status))
-        else:
-            # New event loop
-            loop.run_until_complete(manager.send_discord(message, status))
-    except Exception as e:
-        return f"Alert failed: {e}"
