@@ -4,7 +4,6 @@ in progress
 
 [![GitHub Sponsor](https://img.shields.io/badge/Sponsor-GitHub-EA4AAA?style=for-the-badge&logo=github-sponsors)](https://github.com/sponsors/IdaAkiwumi)
 [![PayPal](https://img.shields.io/badge/Donate-PayPal-00457C?style=for-the-badge&logo=paypal)](https://www.paypal.com/paypalme/iakiwumi)
-[![CI](https://github.com/idaakiwumi/frame-pulse-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/idaakiwumi/frame-pulse-mcp/actions)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![MCP Protocol](https://img.shields.io/badge/MCP-Protocol-orange)](https://modelcontextprotocol.io/)
 [![Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://frame-pulse.streamlit.app)
