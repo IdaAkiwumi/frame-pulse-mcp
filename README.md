@@ -27,6 +27,10 @@ pip install -r requirements.txt
 
 2. **Add to Claude Desktop config**
    * **Windows (MSIX/Store):** `%LOCALAPPDATA%\Packages\Claude_pzs8sxrjxfjjc\LocalCache\Roaming\Claude\claude_desktop_config.json`
+   # Other possible paths
+`\AppData\Roaming\Claude\claude_desktop_config.json`
+`\AppData\Local\Claude\claude_desktop_config.json`
+
    * **Standard:** `%APPDATA%\Claude\claude_desktop_config.json`
 
 ``` json
