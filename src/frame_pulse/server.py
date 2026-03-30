@@ -14,8 +14,9 @@ sys.path.insert(0, _SRC_DIR)
 import logging
 import traceback
 
-# Log to same directory as server.py for portability
-_LOG_DIR = os.path.dirname(os.path.abspath(__file__))
+# Log to temp directory to avoid exposing username in repo
+import tempfile
+_LOG_DIR = tempfile.gettempdir()
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
