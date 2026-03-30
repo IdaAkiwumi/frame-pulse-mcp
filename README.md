@@ -19,11 +19,11 @@ Give your AI assistant (Claude, Hermes, Cursor) a "nervous system" to monitor an
 
 ### Option A: Claude Desktop (Recommended)
 1. **Clone and install**
-[CODE_START]powershell
+``` powershell
 git clone [https://github.com/idaakiwumi/frame-pulse-mcp.git](https://github.com/idaakiwumi/frame-pulse-mcp.git)
 cd frame-pulse-mcp
 pip install -r requirements.txt
-[CODE_END]
+```
 
 2. **Add to Claude Desktop config**
    * **Windows (MSIX/Store):** `%LOCALAPPDATA%\Packages\Claude_pzs8sxrjxfjjc\LocalCache\Roaming\Claude\claude_desktop_config.json`
