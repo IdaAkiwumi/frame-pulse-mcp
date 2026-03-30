@@ -6,19 +6,21 @@ MCP tools for AI agents to monitor and govern creative workstations.
 import sys
 import os
 
-# CRITICAL: Set path BEFORE any frame_pulse imports
-# Use absolute path to work regardless of working directory
-sys.path.insert(0, r"C:\Users\kemia\OneDrive\Documents\GitHub\frame-pulse-mcp\src")
+# Calculate src/ path from this file's location: src/frame_pulse/server.py -> src/
+# This works regardless of working directory
+_SRC_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, _SRC_DIR)
 
-# Now safe to import project modules
 import logging
 import traceback
 
+# Log to same directory as server.py for portability
+_LOG_DIR = os.path.dirname(os.path.abspath(__file__))
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler(r"C:\Users\kemia\OneDrive\Documents\GitHub\frame-pulse-mcp\frame_pulse.log"),
+        logging.FileHandler(os.path.join(_LOG_DIR, "frame_pulse.log")),
         logging.StreamHandler(sys.stderr)
     ]
 )
