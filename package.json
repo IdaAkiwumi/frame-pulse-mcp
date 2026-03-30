@@ -1,0 +1,108 @@
+{
+  "name": "@idaakiwumi/frame-pulse-mcp",
+  "version": "0.1.0",
+  "description": "AI-native telemetry for creative workstations — monitor Blender, Unreal Engine, Houdini, and Maya via MCP",
+  "license": "MIT",
+  "author": "Ida Akiwumi",
+  "homepage": "https://github.com/idaakiwumi/frame-pulse-mcp",
+  "bugs": {
+    "url": "https://github.com/idaakiwumi/frame-pulse-mcp/issues"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "blender",
+    "unreal-engine",
+    "houdini",
+    "maya",
+    "3d-rendering",
+    "creative-workstation",
+    "system-monitoring",
+    "thermal-management",
+    "ai-agent-tools"
+  ],
+  "engines": {
+    "python": ">=3.10"
+  },
+  "skills": [
+    {
+      "id": "check_system_health",
+      "name": "Check System Health",
+      "description": "Monitor CPU, temperature, and thermal status before starting intensive renders",
+      "tags": ["monitoring", "safety", "thermal"]
+    },
+    {
+      "id": "scan_creative_apps",
+      "name": "Scan Creative Applications",
+      "description": "Detect running creative apps: Blender, Unreal Engine, Houdini, Maya, After Effects",
+      "tags": ["detection", "processes", "creative-apps"]
+    },
+    {
+      "id": "throttle_process",
+      "name": "Throttle Background Process",
+      "description": "Reduce CPU priority of background processes to prevent overheating",
+      "tags": ["control", "thermal-management", "priority"]
+    },
+    {
+      "id": "emergency_throttle_process",
+      "name": "Emergency Throttle",
+      "description": "Immediately throttle highest CPU consumer during critical thermal events",
+      "tags": ["emergency", "safety", "auto-throttle"]
+    },
+    {
+      "id": "restore_priority",
+      "name": "Restore Process Priority",
+      "description": "Return a throttled process to normal CPU priority",
+      "tags": ["control", "restore", "undo"]
+    },
+    {
+      "id": "prioritize_process",
+      "name": "Boost Process Priority",
+      "description": "Increase CPU priority for critical renders (use with caution)",
+      "tags": ["control", "boost", "performance"]
+    }
+  ],
+  "installations": {
+    "uvx": {
+      "type": "python",
+      "command": "uvx frame-pulse-mcp",
+      "description": "Run with uvx (fastest, recommended)"
+    },
+    "pipx": {
+      "type": "python",
+      "command": "pipx run frame-pulse-mcp",
+      "description": "Run with pipx (isolated environment)"
+    },
+    "pip": {
+      "type": "python",
+      "command": "pip install frame-pulse-mcp && python -m frame_pulse.server",
+      "description": "Standard pip install and run"
+    },
+    "manual": {
+      "type": "manual",
+      "command": "git clone https://github.com/idaakiwumi/frame-pulse-mcp.git && cd frame-pulse-mcp && pip install -e . && python -m frame_pulse.server",
+      "description": "Clone and install from source"
+    }
+  },
+  "config": {
+    "mcpServers": {
+      "frame-pulse": {
+        "command": "uvx",
+        "args": ["frame-pulse-mcp"],
+        "env": {
+          "PYTHONPATH": "{{local_package_path}}"
+        }
+      }
+    }
+  },
+  "schemas": {
+    "type": "mcp",
+    "transport": "stdio",
+    "version": "1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/idaakiwumi/frame-pulse-mcp.git"
+  }
+}

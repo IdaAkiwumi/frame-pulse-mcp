@@ -1,16 +1,50 @@
 [project]
-name = "production-pulse-mcp"
+name = "frame-pulse-mcp"
 version = "0.1.0"
-description = "MCP server for safeguarding creative production workloads (Blender, UE5, Houdini) via system telemetry"
-authors = [{name = "Ida Akiwumi"}]
+description = "AI-native telemetry for creative workstations — monitor Blender, Unreal Engine, Houdini, and Maya via MCP"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [{name = "Ida Akiwumi", email = "your-email@example.com"}]
+keywords = ["mcp", "blender", "unreal-engine", "houdini", "system-monitoring", "ai-agent"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Monitoring",
+    "Topic :: Artistic Software",
+]
+requires-python = ">=3.10"
 dependencies = [
     "mcp>=1.0.0",
     "psutil>=5.9.0",
-    "streamlit>=1.30.0",
-    "requests>=2.31.0"
+    "requests>=2.31.0",
 ]
-requires-python = ">=3.10"
+
+[project.optional-dependencies]
+dev = [
+    "streamlit>=1.30.0",
+    "pytest>=7.0.0",
+]
+
+[project.scripts]
+frame-pulse-mcp = "frame_pulse.server:mcp.run"
+
+[project.urls]
+Homepage = "https://github.com/idaakiwumi/frame-pulse-mcp"
+Repository = "https://github.com/idaakiwumi/frame-pulse-mcp.git"
+Issues = "https://github.com/idaakiwumi/frame-pulse-mcp/issues"
 
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+frame_pulse = "src/frame_pulse"
