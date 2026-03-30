@@ -75,7 +75,7 @@ As a **Product Architect**, I designed Frame Pulse to be "Headless." Creative pr
 
 ---
 
-##🤝 Community & Recognition
+## 🤝 Community & Recognition
 **Featured on Lobehub — AI tools discovery platform.
 
 ## 🛠️ Built With
