@@ -6,8 +6,23 @@ MCP tools for AI agents to monitor and govern creative workstations.
 import sys
 import os
 
-# Add parent to path for absolute imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# CRITICAL: Set path BEFORE any frame_pulse imports
+# Use absolute path to work regardless of working directory
+sys.path.insert(0, r"C:\Users\kemia\OneDrive\Documents\GitHub\frame-pulse-mcp\src")
+
+# Now safe to import project modules
+import logging
+import traceback
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler(r"C:\Users\kemia\OneDrive\Documents\GitHub\frame-pulse-mcp\frame_pulse.log"),
+        logging.StreamHandler(sys.stderr)
+    ]
+)
+logger = logging.getLogger("frame-pulse")
 
 from mcp.server.fastmcp import FastMCP
 from typing import Optional
@@ -18,32 +33,45 @@ from frame_pulse.render_guard import find_render_processes, format_process_list,
 mcp = FastMCP("FramePulse")
 
 THROTTLE_EXPLANATION = """
-⚠️ WHAT THROTTLING/DEPRIORITIZING DOES:
+WHAT THROTTLING/DEPRIORITIZING DOES:
 - Reduces the target process's CPU priority (Windows: BELOW_NORMAL, Linux: nice +10)
 - Process keeps running but yields CPU to higher-priority work
 - Renders complete faster, system stays responsive, thermals stay controlled
 - REVERSIBLE: You can restore normal priority later if needed
 
-⚠️ WHEN TO USE:
+WHEN TO USE:
 - Background apps competing with your main render
 - Thermal CAUTION state (CPU 75-90%, Temp 75-85°C)
 - Not responding to a render farm deadline
 
-⚠️ WHEN NOT TO USE:
+WHEN NOT TO USE:
 - The process IS your main render (throttle something else instead)
 - CRITICAL thermal state (use emergency throttle or pause entirely)
 """
 
+
 @mcp.tool()
 def check_system_health():
     """Check if workstation is safe for heavy creative workloads."""
-    return get_thermal_status()
+    try:
+        return get_thermal_status()
+    except Exception as e:
+        logger.error(f"check_system_health failed: {e}")
+        logger.error(traceback.format_exc())
+        return {"error": str(e), "status": "degraded"}
+
 
 @mcp.tool()
 def scan_creative_apps(app_name: Optional[str] = None):
     """Find active creative applications (Blender, Unreal, Maya, etc.)."""
-    processes = find_render_processes(app_name)
-    return format_process_list(processes)
+    try:
+        processes = find_render_processes(app_name)
+        return format_process_list(processes)
+    except Exception as e:
+        logger.error(f"scan_creative_apps failed: {e}")
+        logger.error(traceback.format_exc())
+        return {"error": str(e), "processes": []}
+
 
 @mcp.tool()
 def throttle_process(target_pid: Optional[int] = None):
@@ -58,8 +86,13 @@ def throttle_process(target_pid: Optional[int] = None):
     Returns:
         Confirmation message with explanation of what was done.
     """
-    result = emergency_throttle(target_pid)
-    return f"{result}\n\n{THROTTLE_EXPLANATION}"
+    try:
+        result = emergency_throttle(target_pid)
+        return f"{result}\n\n{THROTTLE_EXPLANATION}"
+    except Exception as e:
+        logger.error(f"throttle_process failed: {e}")
+        return {"error": str(e)}
+
 
 @mcp.tool()
 def deprioritize_process(target_pid: Optional[int] = None):
@@ -77,6 +110,7 @@ def deprioritize_process(target_pid: Optional[int] = None):
     result = emergency_throttle(target_pid)
     return f"{result}\n\nTHROTTLING = DEPRIORITIZING: Same function, clearer name for non-technical users.\n\n{THROTTLE_EXPLANATION}"
 
+
 @mcp.tool()
 def emergency_throttle_process(target_pid: Optional[int] = None):
     """
@@ -90,7 +124,12 @@ def emergency_throttle_process(target_pid: Optional[int] = None):
     Returns:
         Action taken, minimal explanation.
     """
-    return emergency_throttle(target_pid)
+    try:
+        return emergency_throttle(target_pid)
+    except Exception as e:
+        logger.error(f"emergency_throttle_process failed: {e}")
+        return f"FAILED: {e}"
+
 
 @mcp.tool()
 def restore_priority(target_pid: int):
@@ -115,16 +154,18 @@ def restore_priority(target_pid: int):
         else:
             p.nice(0)  # Unix normal priority
         
-        return f"✅ Restored {p.name()} (PID {target_pid}) to normal priority\n\nProcess will now compete equally for CPU resources."
+        return f"Restored {p.name()} (PID {target_pid}) to normal priority\n\nProcess will now compete equally for CPU resources."
     except Exception as e:
-        return f"❌ Failed to restore priority: {e}"
+        logger.error(f"restore_priority failed: {e}")
+        return f"Failed to restore priority: {e}"
+
 
 @mcp.tool()
 def prioritize_process(target_pid: int):
     """
     Give a process HIGHER than normal CPU priority.
     
-    ⚠️ WARNING: Use sparingly. High priority can make system unresponsive.
+    WARNING: Use sparingly. High priority can make system unresponsive.
     
     Use only when:
     - A critical render must finish by deadline
@@ -143,35 +184,38 @@ def prioritize_process(target_pid: int):
         
         if hasattr(psutil, 'HIGH_PRIORITY_CLASS'):
             p.nice(psutil.HIGH_PRIORITY_CLASS)
-            warning = "⚠️ HIGH PRIORITY SET: This process will preempt most others. System may feel sluggish."
+            warning = "HIGH PRIORITY SET: This process will preempt most others. System may feel sluggish."
         elif hasattr(psutil, 'ABOVE_NORMAL_PRIORITY_CLASS'):
             p.nice(psutil.ABOVE_NORMAL_PRIORITY_CLASS)
-            warning = "⚠️ Above-normal priority set. Monitor system responsiveness."
+            warning = "Above-normal priority set. Monitor system responsiveness."
         else:
             p.nice(-10)  # Unix high priority (negative = higher)
-            warning = "⚠️ High nice value set (-10). Monitor system load."
+            warning = "High nice value set (-10). Monitor system load."
         
-        return f"⬆️ Prioritized {p.name()} (PID {target_pid})\n\n{warning}\n\nUse 'restore_priority' to undo if system becomes unresponsive."
+        return f"Prioritized {p.name()} (PID {target_pid})\n\n{warning}\n\nUse 'restore_priority' to undo if system becomes unresponsive."
     except Exception as e:
-        return f"❌ Failed to prioritize: {e}"
+        logger.error(f"prioritize_process failed: {e}")
+        return f"Failed to prioritize: {e}"
+
 
 # Backward compatible aliases
 @mcp.tool()
 def get_thermal_status_alias():
     """Alias for check_system_health."""
-    return get_thermal_status()
+    return check_system_health()
+
 
 @mcp.tool()
 def find_render_processes_alias(app_name: Optional[str] = None):
     """Alias for scan_creative_apps."""
-    processes = find_render_processes(app_name)
-    return format_process_list(processes)
+    return scan_creative_apps(app_name)
+
 
 @mcp.tool()
 def emergency_throttle_alias(target_pid: Optional[int] = None):
     """Alias for throttle_process."""
-    result = emergency_throttle(target_pid)
-    return f"{result}\n\n{THROTTLE_EXPLANATION}"
+    return throttle_process(target_pid)
+
 
 if __name__ == "__main__":
     mcp.run()
